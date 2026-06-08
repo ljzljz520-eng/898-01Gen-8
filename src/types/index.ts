@@ -4,7 +4,7 @@ export type FilingStatus = 'filed' | 'pending' | 'not_filed';
 
 export type InspectionImpact = 'no_impact' | 'need_restore' | 'may_fail';
 
-export type PostStatus = 'published' | 'hidden' | 'featured';
+export type PostStatus = 'published' | 'hidden' | 'featured' | 'pending_review';
 
 export type UserRole = 'user' | 'moderator';
 
@@ -32,6 +32,13 @@ export interface Comment {
   createdAt: string;
 }
 
+export interface Supplement {
+  id: string;
+  content: string;
+  images: string[];
+  createdAt: string;
+}
+
 export interface Post {
   id: string;
   userId: string;
@@ -41,6 +48,7 @@ export interface Post {
   images: string[];
   modificationType: ModificationType;
   carModel: CarModel;
+  carModelId?: string;
   filingStatus: FilingStatus;
   cost: number;
   inspectionImpact: InspectionImpact;
@@ -48,9 +56,16 @@ export interface Post {
   isFeatured: boolean;
   hiddenReason?: string;
   requireSupplement?: string;
+  supplements?: Supplement[];
   comments: Comment[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SubmitSupplementData {
+  postId: string;
+  supplementalContent: string;
+  supplementalImages: string[];
 }
 
 export interface CreatePostData {

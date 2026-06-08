@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, Car } from 'lucide-react';
 import { usePostStore } from '@/store/postStore';
+import { Post, CarModel } from '@/types';
 import PostCard from '@/components/PostCard';
 
 export default function CarModelDetail() {
@@ -10,9 +12,36 @@ export default function CarModelDetail() {
   const decodedBrand = decodeURIComponent(brand || '');
   const decodedModel = decodeURIComponent(model || '');
   
-  const featuredPosts = getFeaturedPostsByCar(decodedBrand, decodedModel);
-  const allCars = getCarsWithFeaturedCount();
+  const [featuredPosts, setFeaturedPosts] = useState<Post[]>([]);
+  const [allCars, setAllCars] = useState<(CarModel & { featuredCount: number })[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const [posts, cars] = await Promise.all([
+        getFeaturedPostsByCar(decodedBrand, decodedModel),
+        getCarsWithFeaturedCount(),
+      ]);
+      setFeaturedPosts(posts);
+      setAllCars(cars);
+      setLoading(false);
+    };
+    fetchData();
+  }, [decodedBrand, decodedModel, getFeaturedPostsByCar, getCarsWithFeaturedCount]);
+
   const carInfo = allCars.find(c => c.brand === decodedBrand && c.model === decodedModel);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="animate-pulse">
+          <div className="h-8 w-64 mx-auto mb-4 bg-charcoal-800 rounded" />
+          <div className="h-4 w-48 mx-auto bg-charcoal-800 rounded" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4">

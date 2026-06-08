@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -13,7 +13,10 @@ import {
   Calendar,
   AlertTriangle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Clock,
+  FileText,
+  Image
 } from 'lucide-react';
 import { usePostStore } from '@/store/postStore';
 import { useUserStore } from '@/store/userStore';
@@ -33,11 +36,31 @@ const typeIcons = {
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPostById } = usePostStore();
+  const { getPostById, fetchPostById } = usePostStore();
   const { currentUser } = useUserStore();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const post = getPostById(id || '');
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      fetchPostById(id).finally(() => setLoading(false));
+    }
+  }, [id, fetchPostById]);
+
+  if (loading && !post) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="animate-pulse">
+          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-charcoal-800" />
+          <div className="h-8 w-48 mx-auto mb-2 bg-charcoal-800 rounded" />
+          <div className="h-4 w-64 mx-auto bg-charcoal-800 rounded" />
+        </div>
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -201,6 +224,44 @@ export default function PostDetail() {
                 {post.content}
               </div>
             </div>
+
+            {post.supplements && post.supplements.length > 0 && (
+              <div className="border-t border-charcoal-700/50 pt-6">
+                <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-400" />
+                  补充资料
+                </h3>
+                <div className="space-y-4">
+                  {post.supplements.map((supplement, index) => (
+                    <div key={supplement.id} className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
+                          第 {index + 1} 次补充
+                        </span>
+                        <span className="text-charcoal-500 text-xs flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(supplement.createdAt)}
+                        </span>
+                      </div>
+                      {supplement.content && (
+                        <div className="text-charcoal-300 text-sm mb-3 whitespace-pre-wrap">
+                          {supplement.content}
+                        </div>
+                      )}
+                      {supplement.images && supplement.images.length > 0 && (
+                        <div className="grid grid-cols-4 gap-2">
+                          {supplement.images.map((img, imgIndex) => (
+                            <div key={imgIndex} className="aspect-square rounded overflow-hidden bg-charcoal-800">
+                              <img src={img} alt={`补充图片 ${imgIndex + 1}`} className="w-full h-full object-cover" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <CommentSection postId={post.id} comments={post.comments} />
@@ -211,6 +272,7 @@ export default function PostDetail() {
             postId={post.id}
             isHidden={isHidden}
             isFeatured={post.isFeatured}
+            status={post.status}
             hiddenReason={post.hiddenReason}
             requireSupplement={post.requireSupplement}
           />

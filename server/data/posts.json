@@ -1,0 +1,101 @@
+[
+  {
+    "id": "49a798f7-32d9-48d5-b87a-1bd0bd482574",
+    "userId": "user-1",
+    "user": {
+      "id": "user-1",
+      "nickname": "改装达人小王",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=1",
+      "role": "user",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    "title": "宝马3系改装19寸锻造轮毂作业分享",
+    "content": "原厂18寸实在太小气，咬牙上了19寸锻造。选的是BBS款式，数据是前8.5J ET30，后9.5J ET35，完美齐边。轮胎用的是米其林PS4S，抓地力提升明显。备案过程很顺利，车管所验车拍照20分钟搞定。",
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=BMW%203%20series%20with%2019%20inch%20forged%20wheels%20modified%20car%20sporty%20look%20garage%20background&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=close%20up%20of%20BBS%20style%20forged%20wheel%20on%20BMW%203%20series%20brake%20caliper&image_size=square_hd"
+    ],
+    "modificationType": "wheel",
+    "carModel": {
+      "id": "car-1",
+      "brand": "宝马",
+      "model": "3系",
+      "year": "2024",
+      "brandInitial": "B"
+    },
+    "filingStatus": "filed",
+    "cost": 12800,
+    "inspectionImpact": "no_impact",
+    "status": "published",
+    "isFeatured": true,
+    "comments": [],
+    "createdAt": "2026-06-08T02:37:13.185Z",
+    "updatedAt": "2026-06-08T02:37:13.185Z"
+  },
+  {
+    "id": "b00d0154-8fcf-4df8-bf91-c933aa824492",
+    "userId": "user-2",
+    "user": {
+      "id": "user-2",
+      "nickname": "轮毂专家老李",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=2",
+      "role": "user",
+      "createdAt": "2024-01-02T00:00:00.000Z"
+    },
+    "title": "高尔夫GTI升级LED矩阵大灯，夜晚行车安全感倍增",
+    "content": "原厂蜡烛灯实在受不了，换了全套LED矩阵大灯。带自动远近光切换，转向辅助照明，还有流水转向灯。年检的时候找了黄牛，花了200块搞定。建议大家还是尽量走正规备案流程，省得以后麻烦。",
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=VW%20Golf%20GTI%20with%20LED%20matrix%20headlights%20night%20driving%20blue%20light&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=close%20up%20LED%20matrix%20headlight%20VW%20Golf%20GTI%20daytime%20running%20light&image_size=square_hd"
+    ],
+    "modificationType": "light",
+    "carModel": {
+      "id": "car-4",
+      "brand": "大众",
+      "model": "高尔夫GTI",
+      "year": "2023",
+      "brandInitial": "D"
+    },
+    "filingStatus": "not_filed",
+    "cost": 6500,
+    "inspectionImpact": "may_fail",
+    "status": "published",
+    "isFeatured": false,
+    "comments": [],
+    "createdAt": "2026-06-08T02:37:13.185Z",
+    "updatedAt": "2026-06-08T02:37:13.185Z"
+  },
+  {
+    "id": "526c15aa-d5dd-43d8-a873-52e4df035dff",
+    "userId": "user-3",
+    "user": {
+      "id": "user-3",
+      "nickname": "灯光发烧友",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=3",
+      "role": "user",
+      "createdAt": "2024-01-03T00:00:00.000Z"
+    },
+    "title": "奥迪A4L更换TEIN避震，舒适性与操控兼顾",
+    "content": "原车避震太硬，过减速带颠得不行。换了TEIN的EnduraPro PLUS，高低软硬可调。现在过弯侧倾小了很多，舒适性也提升了。车身降低了2指，视觉效果更运动。备案已经通过，花费300元工本费。",
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Audi%20A4L%20lowered%20suspension%20modified%20stance%20parked%20street&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=TEIN%20coilover%20suspension%20installation%20car%20lift%20workshop&image_size=square_hd"
+    ],
+    "modificationType": "suspension",
+    "carModel": {
+      "id": "car-3",
+      "brand": "奥迪",
+      "model": "A4L",
+      "year": "2024",
+      "brandInitial": "A"
+    },
+    "filingStatus": "filed",
+    "cost": 8900,
+    "inspectionImpact": "no_impact",
+    "status": "published",
+    "isFeatured": true,
+    "comments": [],
+    "createdAt": "2026-06-08T02:37:13.185Z",
+    "updatedAt": "2026-06-08T02:37:13.185Z"
+  }
+]

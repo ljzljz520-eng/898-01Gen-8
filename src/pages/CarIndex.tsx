@@ -1,9 +1,33 @@
+import { useState, useEffect } from 'react';
 import { usePostStore } from '@/store/postStore';
+import { CarModel } from '@/types';
 import { CarIndexList } from '@/components/CarIndex';
 
 export default function CarIndex() {
   const { getCarsWithFeaturedCount } = usePostStore();
-  const carsWithCount = getCarsWithFeaturedCount();
+  const [carsWithCount, setCarsWithCount] = useState<(CarModel & { featuredCount: number })[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await getCarsWithFeaturedCount();
+      setCarsWithCount(data);
+      setLoading(false);
+    };
+    fetchData();
+  }, [getCarsWithFeaturedCount]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="animate-pulse">
+          <div className="h-8 w-64 mx-auto mb-4 bg-charcoal-800 rounded" />
+          <div className="h-4 w-48 mx-auto bg-charcoal-800 rounded" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4">

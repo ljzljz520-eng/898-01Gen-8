@@ -22,7 +22,7 @@ export default function CommentSection({ postId, comments }: CommentSectionProps
 
     setIsSubmitting(true);
     try {
-      addComment(postId, content.trim());
+      await addComment(postId, content.trim());
       setContent('');
     } catch (error) {
       console.error('Failed to add comment:', error);

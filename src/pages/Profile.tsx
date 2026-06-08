@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Shield, Eye, EyeOff, Star, Settings, LogOut, ChevronRight } from 'lucide-react';
+import { User, Shield, Eye, EyeOff, Star, Settings, LogOut, ChevronRight, AlertCircle, Clock } from 'lucide-react';
 import { useUserStore } from '@/store/userStore';
 import { usePostStore } from '@/store/postStore';
-import { UserRole } from '@/types';
 import PostCard from '@/components/PostCard';
+import SupplementForm from '@/components/SupplementForm';
+import LoginModal from '@/components/LoginModal';
 
 export default function Profile() {
   const { currentUser, switchRole, logout } = useUserStore();
-  const { posts } = usePostStore();
-  const [activeTab, setActiveTab] = useState<'published' | 'hidden'>('published');
+  const { posts, refreshPosts } = usePostStore();
+  const [activeTab, setActiveTab] = useState<'published' | 'hidden' | 'supplement' | 'pending'>('published');
+  const [showSupplementForm, setShowSupplementForm] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   if (!currentUser) {
     return (
@@ -18,16 +22,51 @@ export default function Profile() {
           <User className="w-10 h-10 text-charcoal-600" />
         </div>
         <h2 className="text-2xl font-medium text-white mb-2">请先登录</h2>
-        <p className="text-charcoal-400">登录后可以发布改装分享和评论互动</p>
+        <p className="text-charcoal-400 mb-6">登录后可以发布改装分享和评论互动</p>
+        <button
+          onClick={() => setShowLoginModal(true)}
+          className="btn-primary inline-flex items-center gap-2"
+        >
+          <User className="w-5 h-5" />
+          立即登录
+        </button>
+        {showLoginModal && (
+          <LoginModal
+            onClose={() => setShowLoginModal(false)}
+            onSuccess={() => {
+              setShowLoginModal(false);
+              refreshPosts();
+            }}
+          />
+        )}
       </div>
     );
   }
 
   const myPosts = posts.filter(p => p.userId === currentUser.id);
-  const publishedPosts = myPosts.filter(p => p.status !== 'hidden');
-  const hiddenPosts = myPosts.filter(p => p.status === 'hidden');
+  const publishedPosts = myPosts.filter(p => p.status !== 'hidden' && p.status !== 'pending_review');
+  const hiddenPosts = myPosts.filter(p => p.status === 'hidden' && !p.requireSupplement);
+  const supplementPosts = myPosts.filter(p => p.status === 'hidden' && p.requireSupplement);
+  const pendingPosts = myPosts.filter(p => p.status === 'pending_review');
 
-  const displayedPosts = activeTab === 'published' ? publishedPosts : hiddenPosts;
+  const displayedPosts = activeTab === 'published' 
+    ? publishedPosts 
+    : activeTab === 'hidden' 
+      ? hiddenPosts 
+      : activeTab === 'supplement' 
+        ? supplementPosts 
+        : pendingPosts;
+
+  const handleSupplementClick = (post: any) => {
+    setSelectedPost(post);
+    setShowSupplementForm(true);
+  };
+
+  const handleSupplementSuccess = () => {
+    setShowSupplementForm(false);
+    setSelectedPost(null);
+    refreshPosts();
+  };
 
   return (
     <div className="container mx-auto px-4">
@@ -63,6 +102,14 @@ export default function Profile() {
                 <span className="text-amber-400 font-medium">
                   {myPosts.filter(p => p.isFeatured).length}
                 </span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-charcoal-800/50">
+                <span className="text-charcoal-400 text-sm">待补充</span>
+                <span className="text-warning-orange-400 font-medium">{supplementPosts.length}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-charcoal-800/50">
+                <span className="text-charcoal-400 text-sm">待审核</span>
+                <span className="text-blue-400 font-medium">{pendingPosts.length}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-charcoal-800/50">
                 <span className="text-charcoal-400 text-sm">被隐藏</span>
@@ -131,13 +178,27 @@ export default function Profile() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className="flex gap-2 mb-6 border-b border-charcoal-700/50">
+          <div className="flex gap-2 mb-6 border-b border-charcoal-700/50 flex-wrap">
             <button
               onClick={() => setActiveTab('published')}
               className={`tab-item ${activeTab === 'published' ? 'active' : ''}`}
             >
               <Eye className="w-4 h-4 inline mr-2" />
               已发布 ({publishedPosts.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('supplement')}
+              className={`tab-item ${activeTab === 'supplement' ? 'active' : ''}`}
+            >
+              <AlertCircle className="w-4 h-4 inline mr-2" />
+              待补充 ({supplementPosts.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`tab-item ${activeTab === 'pending' ? 'active' : ''}`}
+            >
+              <Clock className="w-4 h-4 inline mr-2" />
+              待审核 ({pendingPosts.length})
             </button>
             <button
               onClick={() => setActiveTab('hidden')}
@@ -153,17 +214,31 @@ export default function Profile() {
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-charcoal-800 flex items-center justify-center">
                 {activeTab === 'published' ? (
                   <Star className="w-10 h-10 text-charcoal-600" />
+                ) : activeTab === 'supplement' ? (
+                  <AlertCircle className="w-10 h-10 text-charcoal-600" />
+                ) : activeTab === 'pending' ? (
+                  <Clock className="w-10 h-10 text-charcoal-600" />
                 ) : (
                   <EyeOff className="w-10 h-10 text-charcoal-600" />
                 )}
               </div>
               <h3 className="text-xl font-medium text-white mb-2">
-                {activeTab === 'published' ? '暂无发布内容' : '暂无被隐藏内容'}
+                {activeTab === 'published' 
+                  ? '暂无发布内容' 
+                  : activeTab === 'supplement'
+                    ? '暂无待补充内容'
+                    : activeTab === 'pending'
+                      ? '暂无待审核内容'
+                      : '暂无被隐藏内容'}
               </h3>
               <p className="text-charcoal-400 mb-6">
                 {activeTab === 'published' 
                   ? '还没有发布过改装分享，快来分享你的经验吧'
-                  : '你发布的内容都已通过审核'
+                  : activeTab === 'supplement'
+                    ? '你发布的内容都已完整，无需补充'
+                    : activeTab === 'pending'
+                      ? '没有待审核的补充内容'
+                      : '你发布的内容都已通过审核'
                 }
               </p>
               {activeTab === 'published' && (
@@ -173,14 +248,68 @@ export default function Profile() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
               {displayedPosts.map((post, index) => (
-                <PostCard key={post.id} post={post} index={index} />
+                <div key={post.id} className="relative">
+                  <PostCard post={post} index={index} />
+                  {activeTab === 'supplement' && post.requireSupplement && (
+                    <div className="mt-4 p-4 bg-warning-orange-500/10 border border-warning-orange-500/30 rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex gap-3">
+                          <AlertCircle className="w-5 h-5 text-warning-orange-400 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <h4 className="font-medium text-warning-orange-400 mb-1">版主要求补充</h4>
+                            <p className="text-charcoal-300 text-sm mb-3">{post.requireSupplement}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleSupplementClick(post)}
+                          className="btn-primary text-sm px-4 py-2 flex-shrink-0"
+                        >
+                          补充资料
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'pending' && (
+                    <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-medium text-blue-400 mb-1">待审核</h4>
+                          <p className="text-charcoal-300 text-sm">补充资料已提交，等待版主审核</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'hidden' && post.hiddenReason && (
+                    <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <EyeOff className="w-5 h-5 text-red-400 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-medium text-red-400 mb-1">已被隐藏</h4>
+                          <p className="text-charcoal-300 text-sm">原因：{post.hiddenReason}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {showSupplementForm && selectedPost && (
+        <SupplementForm
+          post={selectedPost}
+          onClose={() => {
+            setShowSupplementForm(false);
+            setSelectedPost(null);
+          }}
+          onSuccess={handleSupplementSuccess}
+        />
+      )}
     </div>
   );
 }

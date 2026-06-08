@@ -1,0 +1,142 @@
+[
+  {
+    "id": "car-1",
+    "brand": "宝马",
+    "model": "3系",
+    "year": "2024",
+    "brandInitial": "B"
+  },
+  {
+    "id": "car-2",
+    "brand": "奔驰",
+    "model": "C级",
+    "year": "2023",
+    "brandInitial": "B"
+  },
+  {
+    "id": "car-3",
+    "brand": "奥迪",
+    "model": "A4L",
+    "year": "2024",
+    "brandInitial": "A"
+  },
+  {
+    "id": "car-4",
+    "brand": "大众",
+    "model": "高尔夫GTI",
+    "year": "2023",
+    "brandInitial": "D"
+  },
+  {
+    "id": "car-5",
+    "brand": "丰田",
+    "model": "凯美瑞",
+    "year": "2024",
+    "brandInitial": "F"
+  },
+  {
+    "id": "car-6",
+    "brand": "本田",
+    "model": "雅阁",
+    "year": "2023",
+    "brandInitial": "B"
+  },
+  {
+    "id": "car-7",
+    "brand": "别克",
+    "model": "君威GS",
+    "year": "2024",
+    "brandInitial": "B"
+  },
+  {
+    "id": "car-8",
+    "brand": "马自达",
+    "model": "阿特兹",
+    "year": "2023",
+    "brandInitial": "M"
+  },
+  {
+    "id": "car-9",
+    "brand": "日产",
+    "model": "天籁",
+    "year": "2024",
+    "brandInitial": "R"
+  },
+  {
+    "id": "car-10",
+    "brand": "福特",
+    "model": "蒙迪欧",
+    "year": "2023",
+    "brandInitial": "F"
+  },
+  {
+    "id": "car-11",
+    "brand": "雪佛兰",
+    "model": "迈锐宝XL",
+    "year": "2024",
+    "brandInitial": "X"
+  },
+  {
+    "id": "car-12",
+    "brand": "起亚",
+    "model": "K5",
+    "year": "2023",
+    "brandInitial": "Q"
+  },
+  {
+    "id": "car-13",
+    "brand": "现代",
+    "model": "索纳塔",
+    "year": "2024",
+    "brandInitial": "X"
+  },
+  {
+    "id": "car-14",
+    "brand": "标致",
+    "model": "508L",
+    "year": "2023",
+    "brandInitial": "B"
+  },
+  {
+    "id": "car-15",
+    "brand": "雪铁龙",
+    "model": "C6",
+    "year": "2024",
+    "brandInitial": "X"
+  },
+  {
+    "id": "car-16",
+    "brand": "斯巴鲁",
+    "model": "力狮",
+    "year": "2023",
+    "brandInitial": "S"
+  },
+  {
+    "id": "car-17",
+    "brand": "雷克萨斯",
+    "model": "ES",
+    "year": "2024",
+    "brandInitial": "L"
+  },
+  {
+    "id": "car-18",
+    "brand": "英菲尼迪",
+    "model": "Q50L",
+    "year": "2023",
+    "brandInitial": "Y"
+  },
+  {
+    "id": "car-19",
+    "brand": "沃尔沃",
+    "model": "S60",
+    "year": "2024",
+    "brandInitial": "W"
+  },
+  {
+    "id": "car-20",
+    "brand": "凯迪拉克",
+    "model": "CT5",
+    "year": "2023",
+    "brandInitial": "K"
+  }
+]

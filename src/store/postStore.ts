@@ -1,25 +1,39 @@
 import { create } from 'zustand';
-import { Post, CreatePostData, Comment, CarModel, FilingStatus } from '@/types';
-import { storage, generateId } from '@/utils/storage';
-import { mockPosts } from '@/data/mockPosts';
-import { mockCars } from '@/data/mockCars';
+import { Post, CreatePostData, Comment, CarModel, FilingStatus, SubmitSupplementData } from '@/types';
+import { storage } from '@/utils/storage';
+import { api } from '@/utils/api';
 import { useUserStore } from './userStore';
 
 interface PostState {
   posts: Post[];
   cars: CarModel[];
-  initData: () => void;
-  addPost: (data: CreatePostData) => Post;
+  loading: boolean;
+  error: string | null;
+  initData: () => Promise<void>;
+  fetchPosts: (filters?: {
+    modificationType?: string;
+    filingStatus?: FilingStatus;
+    search?: string;
+    includeHidden?: boolean;
+    userId?: string;
+    status?: string;
+    isFeatured?: boolean;
+  }) => Promise<Post[]>;
+  fetchPostById: (id: string) => Promise<Post | null>;
+  addPost: (data: CreatePostData) => Promise<Post>;
   getPostById: (id: string) => Post | undefined;
-  updatePost: (id: string, updates: Partial<Post>) => void;
-  hidePost: (id: string, reason: string) => void;
-  unhidePost: (id: string) => void;
-  requireSupplement: (id: string, message: string) => void;
-  markAsFeatured: (id: string) => void;
-  unmarkAsFeatured: (id: string) => void;
-  addComment: (postId: string, content: string) => Comment | null;
-  getFeaturedPostsByCar: (brand: string, model: string) => Post[];
-  getCarsWithFeaturedCount: () => (CarModel & { featuredCount: number })[];
+  updatePost: (id: string, updates: Partial<Post>) => Promise<Post>;
+  hidePost: (id: string, reason: string) => Promise<Post>;
+  unhidePost: (id: string) => Promise<Post>;
+  requireSupplement: (id: string, message: string) => Promise<Post>;
+  submitSupplement: (data: SubmitSupplementData) => Promise<Post>;
+  approvePost: (id: string) => Promise<Post>;
+  markAsFeatured: (id: string) => Promise<Post>;
+  unmarkAsFeatured: (id: string) => Promise<Post>;
+  addComment: (postId: string, content: string) => Promise<Comment | null>;
+  getFeaturedPostsByCar: (brand: string, model: string) => Promise<Post[]>;
+  getCarsWithFeaturedCount: () => Promise<(CarModel & { featuredCount: number })[]>;
+  refreshPosts: () => Promise<void>;
   getFilteredPosts: (filters: {
     modificationType?: string;
     filingStatus?: FilingStatus;
@@ -31,134 +45,179 @@ interface PostState {
 export const usePostStore = create<PostState>((set, get) => ({
   posts: [],
   cars: [],
+  loading: false,
+  error: null,
   
-  initData: () => {
-    let posts = storage.getPosts<Post>();
-    if (posts.length === 0) {
-      posts = mockPosts;
-      storage.setPosts(posts);
+  initData: async () => {
+    set({ loading: true, error: null });
+    try {
+      const [cars, posts] = await Promise.all([
+        api.getCars(),
+        api.getPosts({ includeHidden: true }),
+      ]);
+      set({ cars, posts, loading: false });
+    } catch (error) {
+      console.error('初始化数据失败:', error);
+      const cars = storage.getCars<CarModel>();
+      const posts = storage.getPosts<Post>();
+      set({ cars, posts, loading: false });
     }
-    
-    let cars = storage.getCars<CarModel>();
-    if (cars.length === 0) {
-      cars = mockCars;
-      storage.setCars(cars);
-    }
-    
-    set({ posts, cars });
   },
   
-  addPost: (data: CreatePostData) => {
+  refreshPosts: async () => {
+    try {
+      const posts = await api.getPosts({ includeHidden: true });
+      set({ posts });
+    } catch (error) {
+      console.error('刷新帖子失败:', error);
+    }
+  },
+  
+  fetchPosts: async (filters) => {
+    try {
+      const posts = await api.getPosts(filters);
+      return posts;
+    } catch (error) {
+      console.error('获取帖子失败:', error);
+      return [];
+    }
+  },
+  
+  fetchPostById: async (id: string) => {
+    try {
+      const post = await api.getPostById(id);
+      set(state => ({
+        posts: state.posts.map(p => p.id === id ? post : p),
+      }));
+      return post;
+    } catch (error) {
+      console.error('获取帖子详情失败:', error);
+      return null;
+    }
+  },
+  
+  addPost: async (data: CreatePostData) => {
     const { currentUser } = useUserStore.getState();
     if (!currentUser) throw new Error('请先登录');
     
-    const car = get().cars.find(c => c.id === data.carModelId);
-    if (!car) throw new Error('车型不存在');
-    
-    const newPost: Post = {
-      id: generateId(),
-      userId: currentUser.id,
-      user: currentUser,
-      title: data.title,
-      content: data.content,
-      images: data.images,
-      modificationType: data.modificationType,
-      carModel: car,
-      filingStatus: data.filingStatus,
-      cost: data.cost,
-      inspectionImpact: data.inspectionImpact,
-      status: 'published',
-      isFeatured: false,
-      comments: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    const posts = [newPost, ...get().posts];
-    storage.setPosts(posts);
-    set({ posts });
-    return newPost;
+    set({ loading: true, error: null });
+    try {
+      const newPost = await api.createPost({ ...data, userId: currentUser.id });
+      set(state => ({
+        posts: [newPost, ...state.posts],
+        loading: false,
+      }));
+      storage.setPosts([newPost, ...get().posts]);
+      return newPost;
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : '发布失败', loading: false });
+      throw error;
+    }
   },
   
   getPostById: (id: string) => {
     return get().posts.find(p => p.id === id);
   },
   
-  updatePost: (id: string, updates: Partial<Post>) => {
-    const posts = get().posts.map(p => 
-      p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
-    );
-    storage.setPosts(posts);
-    set({ posts });
+  updatePost: async (id: string, updates: Partial<Post>) => {
+    set({ loading: true, error: null });
+    try {
+      const updatedPost = await api.updatePost(id, updates);
+      set(state => ({
+        posts: state.posts.map(p => p.id === id ? updatedPost : p),
+        loading: false,
+      }));
+      storage.setPosts(get().posts);
+      return updatedPost;
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : '更新失败', loading: false });
+      throw error;
+    }
   },
   
-  hidePost: (id: string, reason: string) => {
-    get().updatePost(id, { status: 'hidden', hiddenReason: reason });
+  hidePost: async (id: string, reason: string) => {
+    return await get().updatePost(id, { status: 'hidden', hiddenReason: reason });
   },
   
-  unhidePost: (id: string) => {
-    get().updatePost(id, { status: 'published', hiddenReason: undefined });
+  unhidePost: async (id: string) => {
+    return await get().updatePost(id, { status: 'published', hiddenReason: undefined });
   },
   
-  requireSupplement: (id: string, message: string) => {
-    get().updatePost(id, { requireSupplement: message, status: 'hidden' });
+  requireSupplement: async (id: string, message: string) => {
+    return await get().updatePost(id, { requireSupplement: message, status: 'hidden' });
   },
   
-  markAsFeatured: (id: string) => {
-    get().updatePost(id, { isFeatured: true });
+  submitSupplement: async (data: SubmitSupplementData) => {
+    set({ loading: true, error: null });
+    try {
+      const updatedPost = await api.submitSupplement(data);
+      set(state => ({
+        posts: state.posts.map(p => p.id === data.postId ? updatedPost : p),
+        loading: false,
+      }));
+      storage.setPosts(get().posts);
+      return updatedPost;
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : '提交失败', loading: false });
+      throw error;
+    }
   },
   
-  unmarkAsFeatured: (id: string) => {
-    get().updatePost(id, { isFeatured: false });
+  approvePost: async (id: string) => {
+    return await get().updatePost(id, { status: 'published' });
   },
   
-  addComment: (postId: string, content: string) => {
+  markAsFeatured: async (id: string) => {
+    return await get().updatePost(id, { isFeatured: true });
+  },
+  
+  unmarkAsFeatured: async (id: string) => {
+    return await get().updatePost(id, { isFeatured: false });
+  },
+  
+  addComment: async (postId: string, content: string) => {
     const { currentUser } = useUserStore.getState();
     if (!currentUser) return null;
     
-    const newComment: Comment = {
-      id: generateId(),
-      userId: currentUser.id,
-      user: currentUser,
-      content,
-      createdAt: new Date().toISOString(),
-    };
-    
-    const posts = get().posts.map(p => {
-      if (p.id === postId) {
-        return {
-          ...p,
-          comments: [...p.comments, newComment],
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return p;
-    });
-    
-    storage.setPosts(posts);
-    set({ posts });
-    return newComment;
+    try {
+      const newComment = await api.addComment(postId, currentUser.id, content);
+      set(state => ({
+        posts: state.posts.map(p => 
+          p.id === postId 
+            ? { ...p, comments: [...p.comments, newComment], updatedAt: new Date().toISOString() }
+            : p
+        ),
+      }));
+      storage.setPosts(get().posts);
+      return newComment;
+    } catch (error) {
+      console.error('评论失败:', error);
+      return null;
+    }
   },
   
-  getFeaturedPostsByCar: (brand: string, model: string) => {
-    return get().posts.filter(
-      p => p.isFeatured && 
-           p.carModel.brand === brand && 
-           p.carModel.model === model &&
-           p.status !== 'hidden'
-    );
+  getFeaturedPostsByCar: async (brand: string, model: string) => {
+    try {
+      const posts = await api.getPosts({
+        isFeatured: true,
+        carBrand: brand,
+        carModel: model,
+        includeHidden: false,
+      });
+      return posts;
+    } catch (error) {
+      console.error('获取精品帖子失败:', error);
+      return [];
+    }
   },
   
-  getCarsWithFeaturedCount: () => {
-    const { posts, cars } = get();
-    return cars.map(car => {
-      const featuredCount = posts.filter(
-        p => p.isFeatured && 
-             p.carModel.id === car.id &&
-             p.status !== 'hidden'
-      ).length;
-      return { ...car, featuredCount };
-    });
+  getCarsWithFeaturedCount: async () => {
+    try {
+      return await api.getCarsWithFeaturedCount();
+    } catch (error) {
+      console.error('获取车型统计失败:', error);
+      return [];
+    }
   },
   
   getFilteredPosts: ({ modificationType, filingStatus, search, includeHidden = false }) => {

@@ -107,7 +107,7 @@ export default function PostForm() {
         images,
       };
       
-      const newPost = addPost(postData);
+      const newPost = await addPost(postData);
       setShowSuccess(true);
       
       setTimeout(() => {

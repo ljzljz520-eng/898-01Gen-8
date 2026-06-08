@@ -1,0 +1,37 @@
+[
+  {
+    "id": "user-1",
+    "nickname": "改装达人小王",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=1",
+    "role": "user",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "user-2",
+    "nickname": "轮毂专家老李",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=2",
+    "role": "user",
+    "createdAt": "2024-01-02T00:00:00.000Z"
+  },
+  {
+    "id": "user-3",
+    "nickname": "灯光发烧友",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=3",
+    "role": "user",
+    "createdAt": "2024-01-03T00:00:00.000Z"
+  },
+  {
+    "id": "mod-1",
+    "nickname": "版主-阿强",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=4",
+    "role": "moderator",
+    "createdAt": "2023-12-01T00:00:00.000Z"
+  },
+  {
+    "id": "mod-2",
+    "nickname": "版主-小美",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=5",
+    "role": "moderator",
+    "createdAt": "2023-12-05T00:00:00.000Z"
+  }
+]
